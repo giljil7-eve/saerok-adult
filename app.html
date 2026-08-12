@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>새록</title>
+<style>
+:root {
+  --bg: #f7f4f1;
+  --card: #ffffff;
+  --text: #363040;
+  --text-sub: #6b6478;
+  --accent: #8b7fa3;
+  --accent-light: #ece8f2;
+  --accent-dark: #574b6e;
+  --border: #dcd6d9;
+  --info-bg: #eceef0;
+  --info-text: #4a5560;
+  --warn-bg: #fff6e0;
+  --warn-text: #7a5a10;
+  --chip-bg: #f2f2f0;
+  --chip-active: #e6e2ee;
+  --chip-border: #c8c8c4;
+  --input-bg: #faf8f6;
+  --shadow: 0 2px 10px rgba(0,0,0,0.05);
+  --radius: 14px;
+  --tab-bg: #eae6e2;
+  --tab-active: #ffffff;
+  --tab-text: #6b7b6b;
+  --tab-active-text: #574b6e;
+  --delete-color: #b84040;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #17151b; --card: #221f28; --text: #eae6f0; --text-sub: #b6aec6;
+    --accent: #a89bc4; --accent-light: #2b2635; --accent-dark: #cbc0e0;
+    --border: #423c4a; --info-bg: #232a2c; --info-text: #a8c4bc;
+    --warn-bg: #2e2a18; --warn-text: #e0c060; --chip-bg: #2a2632;
+    --chip-active: #362f45; --chip-border: #574e66; --input-bg: #1c1922;
+    --shadow: 0 2px 10px rgba(0,0,0,0.3); --tab-bg: #1c1922;
+    --tab-active: #322c3e; --tab-text: #a096b0; --tab-active-text: #cbc0e0;
+    --delete-color: #e06060;
+  }
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;line-height:1.6;overflow-wrap:anywhere;word-break:keep-all}
+.chip{-webkit-user-select:none}
+.chip:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+@media(prefers-reduced-motion:reduce){*{transition:none !important;animation:none !important}}
+.backup-hint{background:var(--info-bg);border-radius:10px;padding:12px 14px;font-size:0.82rem;color:var(--info-text);margin-bottom:14px;line-height:1.5;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.backup-hint .btn{width:auto;margin-top:0;padding:8px 14px;font-size:0.8rem}
+.login-brand{display:flex;flex-direction:column;align-items:center;gap:14px;margin-bottom:30px}
+.login-brand img{width:160px;height:160px;object-fit:contain}
+.login-brand h1{font-size:1.4rem;color:var(--accent-dark);margin:0}
+.login-content{display:flex;flex-direction:column;align-items:center;width:100%;max-width:380px}
+.login-content .login-character{width:160px;height:160px;object-fit:contain;margin-bottom:24px}
+.login-content .lock-card .login-title{font-size:1.3rem;color:var(--accent-dark);text-align:center;margin-bottom:24px}
+.hidden{display:none !important}
+.lock-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:24px;text-align:center}
+.lock-screen h1{font-size:1.4rem;margin-bottom:4px;color:var(--accent-dark)}
+.lock-screen .subtitle{font-size:0.85rem;color:var(--text-sub);margin-bottom:24px}
+.lock-screen .lock-card{background:var(--card);border-radius:var(--radius);padding:28px;width:100%;max-width:380px;box-shadow:var(--shadow);border:1px solid var(--border)}
+.lock-screen label{display:block;text-align:left;font-size:0.82rem;font-weight:600;margin-bottom:6px;margin-top:16px;color:var(--text)}
+.lock-screen input{width:100%;padding:12px;border:1.5px solid var(--border);border-radius:10px;font-size:0.9rem;background:var(--input-bg);color:var(--text)}
+.lock-screen input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 2px rgba(139,127,163,0.18)}
+.lock-screen .hint{font-size:0.75rem;color:var(--text-sub);margin-top:4px;text-align:left}
+.lock-screen .info-box{background:var(--info-bg);border-radius:10px;padding:12px;font-size:0.78rem;color:var(--info-text);margin-top:18px;text-align:left;line-height:1.5}
+.lock-screen .warn-box{background:var(--warn-bg);border-radius:10px;padding:12px;font-size:0.78rem;color:var(--warn-text);margin-top:12px;text-align:left;line-height:1.5}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:10px;font-size:0.9rem;font-weight:700;cursor:pointer;margin-top:16px;transition:opacity 0.2s}
+.btn:active{opacity:0.8}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-ghost{background:transparent;color:var(--accent-dark);font-size:0.82rem;font-weight:500;margin-top:10px;padding:8px}
+.tab-nav{position:sticky;top:0;z-index:100;background:var(--bg);padding:8px 12px 6px}
+.tab-header{display:flex;align-items:center;gap:6px}
+.tab-segment{display:flex;background:var(--tab-bg);border-radius:10px;padding:3px;box-shadow:inset 0 1px 3px rgba(0,0,0,0.06);flex:1}
+.tab-btn{flex:1;padding:8px 4px;text-align:center;border:none;background:transparent;cursor:pointer;font-size:0.76rem;font-weight:600;color:var(--tab-text);border-radius:8px;transition:all 0.2s}
+.tab-btn.active{background:var(--tab-active);color:var(--tab-active-text);box-shadow:0 2px 6px rgba(0,0,0,0.08)}
+.lock-btn{flex-shrink:0;padding:6px 8px;border-radius:8px;font-size:0.85rem;border:1.5px solid var(--border);background:var(--card);color:var(--text-sub);cursor:pointer;line-height:1;transition:all 0.2s}
+.lock-btn:active{opacity:0.7}
+@media(prefers-color-scheme:dark){.lock-btn{border-color:var(--chip-border);color:var(--text);background:var(--chip-bg)}}
+@media(min-width:480px){.tab-nav{padding:10px 16px 8px}.tab-btn{font-size:0.82rem;padding:9px 6px}.lock-btn{padding:7px 12px;font-size:0.78rem}}
+.tab-content{padding:12px 16px 40px;max-width:640px;margin:0 auto}
+.tab-panel{display:none}.tab-panel.active{display:block}
+.card{background:var(--card);border-radius:var(--radius);padding:16px;margin-bottom:12px;box-shadow:var(--shadow);border:1px solid var(--border)}
+.card h3{font-size:0.9rem;color:var(--accent-dark);margin-bottom:8px}
+.info-banner{background:var(--info-bg);border-radius:10px;padding:14px;font-size:0.82rem;color:var(--info-text);margin-bottom:14px;line-height:1.5}
+.warn-banner{background:var(--warn-bg);border-radius:10px;padding:14px;font-size:0.82rem;color:var(--warn-text);margin-bottom:14px;line-height:1.5}
+.form-group{margin-bottom:16px}
+.form-group label{display:block;font-size:0.82rem;font-weight:600;margin-bottom:6px;color:var(--text)}
+.form-group .optional{color:var(--text-sub);font-weight:400}
+.form-group input,.form-group textarea,.form-group select{width:100%;padding:11px 13px;border:1.5px solid var(--border);border-radius:10px;font-size:0.85rem;background:var(--input-bg);color:var(--text);font-family:inherit;color-scheme:light dark}
+.form-group input:focus,.form-group textarea:focus,.form-group select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 2px rgba(139,127,163,0.18)}
+.form-group textarea{min-height:80px;resize:vertical}
+.form-group .form-hint{font-size:0.75rem;color:var(--text-sub);margin-top:4px}
+input[type="date"],input[type="time"]{position:relative}
+input[type="date"]::-webkit-calendar-picker-indicator,input[type="time"]::-webkit-calendar-picker-indicator{cursor:pointer;padding:6px;border-radius:4px;opacity:0.7}
+@media(prefers-color-scheme:dark){input[type="date"],input[type="time"]{color-scheme:dark}input[type="date"]::-webkit-calendar-picker-indicator,input[type="time"]::-webkit-calendar-picker-indicator{filter:invert(1) brightness(1.8);opacity:0.85;cursor:pointer}}
+.step-indicator{display:flex;justify-content:center;align-items:center;gap:6px;margin-bottom:16px;font-size:0.78rem;color:var(--text-sub)}
+.step-dot{width:8px;height:8px;border-radius:50%;background:var(--chip-border);transition:all 0.2s}
+.step-dot.active{background:var(--accent);width:20px;border-radius:4px}
+.step-dot.done{background:var(--accent)}
+.step-counter{font-weight:700;color:var(--accent-dark);margin-left:8px}
+.step-nav{display:flex;gap:10px;margin-top:18px}
+.step-nav .btn{flex:1;margin-top:0}
+.step-nav .btn-back{background:var(--chip-bg);color:var(--text-sub);border:1px solid var(--border)}
+.confirm-section{margin-bottom:12px}.confirm-label{font-size:0.73rem;font-weight:700;color:var(--text-sub);margin-bottom:2px}.confirm-value{font-size:0.84rem;color:var(--text);margin-bottom:10px;line-height:1.6}.confirm-chips{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:10px}
+.mascot-panel{display:flex;align-items:center;gap:10px;background:var(--accent-light);border-radius:12px;padding:8px 12px;margin-bottom:12px;border:1px solid var(--accent)}
+.mascot-panel img{width:78px;height:78px;object-fit:contain;flex-shrink:0}
+.mascot-bubble{flex:1}
+.mascot-bubble .mascot-main{font-size:1.08rem;font-weight:700;color:var(--accent-dark);line-height:1.3}
+.mascot-bubble .mascot-sub{font-size:0.86rem;color:var(--text-sub);margin-top:2px;line-height:1.35}
+@media(min-width:480px){.mascot-panel img{width:110px;height:110px}.mascot-panel{padding:10px 16px;gap:12px}.mascot-bubble .mascot-main{font-size:1.2rem}.mascot-bubble .mascot-sub{font-size:0.92rem}}
+@media(prefers-color-scheme:dark){.mascot-panel{background:var(--accent-light);border-color:var(--chip-border)}.mascot-panel img{filter:brightness(1.05)}}
+.mascot-intro{display:flex;flex-direction:column;align-items:center;margin-bottom:4px;text-align:center}
+.mascot-intro img{width:40%;max-height:200px;object-fit:contain;margin-bottom:2px}
+@media(min-width:480px){.mascot-intro img{width:35%;max-height:240px}}
+@media(prefers-color-scheme:dark){.mascot-intro img{filter:brightness(1.05)}}
+.onboard-title{text-align:center;margin-bottom:6px}
+.onboard-title h2{font-size:1.25rem;color:var(--accent-dark);margin-bottom:2px}
+.onboard-title p{font-size:0.8rem;color:var(--text-sub)}
+.onboard-desc{font-size:0.84rem;line-height:1.65;color:var(--text);text-align:center;margin-bottom:10px}
+.onboard-points{display:flex;flex-direction:column;gap:5px;margin-bottom:10px}
+.onboard-point{display:flex;align-items:center;gap:8px;background:var(--accent-light);border-radius:8px;padding:7px 12px;font-size:0.83rem;color:var(--accent-dark)}
+.onboard-point{align-items:flex-start;line-height:1.5}
+.onboard-point>span:first-child{font-size:0.95rem;flex-shrink:0}
+.onboard-point b{color:var(--accent-dark)}
+.onboard-more{margin-top:14px;font-size:0.8rem;color:var(--text-sub)}
+.onboard-more summary{cursor:pointer;color:var(--accent-dark);padding:6px 0}
+.onboard-more p{margin:8px 0;line-height:1.6}
+.time-approx{display:flex;align-items:center;gap:6px;margin-top:8px;font-size:0.82rem;color:var(--text-sub);font-weight:400}
+.time-approx input{width:auto;margin:0}
+.onboard-flow{display:flex;justify-content:space-between;gap:3px;margin-bottom:10px;flex-wrap:nowrap}
+.onboard-flow-item{flex:1;text-align:center;padding:5px 2px;background:var(--chip-bg);border-radius:7px;border:1px solid var(--border)}
+.onboard-flow-item .flow-num{display:block;font-size:0.68rem;font-weight:700;color:var(--accent);margin-bottom:1px}
+.onboard-flow-item .flow-label{font-size:0.65rem;color:var(--text-sub);line-height:1.2}
+.mascot-empty{display:flex;flex-direction:column;align-items:center;text-align:center;padding:20px 0}
+.mascot-empty img{width:140px;height:140px;object-fit:contain;margin-bottom:12px}
+@media(min-width:480px){.mascot-empty img{width:160px;height:160px}}
+.chip-group{display:flex;flex-wrap:wrap;gap:8px}
+.chip{padding:7px 14px;border-radius:20px;font-size:0.8rem;border:1.5px solid var(--chip-border);background:var(--chip-bg);color:var(--text);cursor:pointer;transition:all 0.15s;user-select:none}
+.chip.selected{background:var(--chip-active);border-color:var(--accent);color:var(--accent-dark)}
+.timeline-card{background:var(--card);border-radius:var(--radius);padding:16px;margin-bottom:12px;box-shadow:var(--shadow);border:1px solid var(--border);border-left:4px solid var(--accent);cursor:pointer;transition:box-shadow 0.2s}
+.timeline-card:active{box-shadow:0 1px 4px rgba(0,0,0,0.1)}
+.timeline-card .tl-header{display:flex;justify-content:space-between;align-items:center}
+.timeline-card .tl-date{font-size:0.78rem;color:var(--text-sub)}
+.timeline-card .tl-expand-icon{font-size:0.7rem;color:var(--text-sub);transition:transform 0.2s}
+.timeline-card.expanded .tl-expand-icon{transform:rotate(180deg)}
+.timeline-card .tl-place{font-size:0.78rem;color:var(--accent-dark);margin-top:4px}
+.timeline-card .tl-summary{font-size:0.84rem;color:var(--text);margin-top:8px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.timeline-card.expanded .tl-summary{display:none}
+.timeline-card .tl-tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:8px}
+.timeline-card .tl-tag{font-size:0.7rem;padding:3px 8px;border-radius:12px;background:var(--accent-light);color:var(--accent-dark)}
+.timeline-card .tl-detail{display:none;margin-top:12px}
+.timeline-card.expanded .tl-detail{display:block}
+.tl-detail-row{margin-bottom:8px}
+.tl-detail-label{font-size:0.72rem;font-weight:700;color:var(--text-sub);margin-bottom:1px}
+.tl-detail-value{font-size:0.82rem;color:var(--text);line-height:1.5}
+.tl-detail-chips{display:flex;flex-wrap:wrap;gap:4px;margin-top:2px}
+.tl-detail-chip{font-size:0.7rem;padding:3px 10px;border-radius:12px;background:var(--chip-active);color:var(--accent-dark);border:1px solid var(--accent)}
+.tl-actions{display:none;margin-top:14px;gap:8px}
+.timeline-card.expanded .tl-actions{display:flex}
+.tl-actions button{flex:1;padding:9px 14px;border-radius:8px;font-size:0.8rem;font-weight:600;border:1.5px solid var(--border);background:var(--input-bg);color:var(--text-sub);cursor:pointer}
+.tl-actions .tl-edit-btn{color:var(--accent-dark);border-color:var(--accent)}
+.tl-actions .tl-delete-btn{color:var(--delete-color);border-color:var(--delete-color)}
+.stat-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);font-size:0.84rem}
+.stat-row:last-child{border-bottom:none}
+.stat-label{color:var(--text-sub)}.stat-value{font-weight:700;color:var(--accent-dark)}
+.bar-chart{margin-top:8px}.bar-row{display:flex;align-items:center;margin-bottom:6px}
+.bar-label{width:50px;font-size:0.73rem;color:var(--text-sub)}
+.bar-track{flex:1;height:18px;background:var(--chip-bg);border-radius:9px;overflow:hidden}
+.bar-fill{height:100%;background:var(--accent);border-radius:9px;transition:width 0.3s}
+.bar-count{width:24px;text-align:right;font-size:0.73rem;color:var(--text-sub);margin-left:6px}
+.summary-box{background:var(--input-bg);border:1.5px solid var(--border);border-radius:10px;padding:16px;font-size:0.83rem;color:var(--text);white-space:pre-line;line-height:1.7}
+.footer-credit{text-align:center;padding:24px 16px 16px;font-size:0.73rem;color:var(--text-sub);line-height:1.6;opacity:0.8}
+@media(max-width:480px){.tab-content{padding:10px 12px 40px}.card{padding:16px}.tab-nav{padding:10px 12px 6px}}
+  /* 인앱 브라우저 안내 / 임시저장 안내 */
+  .env-notice{margin:10px auto 0;max-width:520px;background:#fff6e0;border:1px solid #f0d9a0;
+    border-radius:12px;padding:12px 14px;font-size:0.84rem;line-height:1.55;color:#6b5426}
+  .env-notice strong{display:block;margin-bottom:4px;font-size:0.88rem;color:#5a4415}
+  .env-notice .env-close{margin-top:8px;background:none;border:1px solid #e0cb95;border-radius:8px;
+    padding:5px 10px;font-size:0.78rem;color:#6b5426;cursor:pointer}
+  .draft-notice{background:#efecf5;border:1px solid #d8d1e4;border-radius:12px;padding:12px 14px;
+    margin-bottom:12px;font-size:0.84rem;line-height:1.55;color:#4f4560}
+  .draft-notice .draft-actions{margin-top:8px;display:flex;gap:8px}
+  .draft-notice button{border-radius:8px;padding:6px 12px;font-size:0.8rem;cursor:pointer;border:1px solid #cfc6de}
+  .draft-notice .draft-keep{background:#7d6fa0;color:#fff;border-color:#7d6fa0}
+  .draft-notice .draft-drop{background:#fff;color:#6b6478}
+  /* 화면을 벗어났을 때 내용을 덮는 가림막 */
+  .screen-cover{position:fixed;inset:0;z-index:9999;background:var(--bg);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px}
+  .screen-cover.hidden{display:none}
+  .screen-cover img{width:110px;opacity:.75}
+  .screen-cover p{font-size:0.88rem;color:var(--text-sub)}
+</style>
+</head>
+<body>
+<input type="file" id="import-file" accept=".json" style="display:none" onchange="handleImport(event)">
+<div id="screen-cover" class="screen-cover hidden" aria-hidden="true">
+  <img src="어른새록5_품은.png" alt="">
+  <p>화면을 잠시 가려 두었습니다.</p>
+</div>
+<div id="env-notice" class="env-notice" style="display:none">
+  <strong>다른 브라우저에서 열어 주세요</strong>
+  <span id="env-notice-body"></span>
+  <button type="button" class="env-close" onclick="dismissEnvNotice()">알겠어요, 이대로 볼게요</button>
+</div>
+<div id="lock-setup" class="lock-screen hidden">
+  <h1>사라지지 않는 기록</h1>
+  <p class="subtitle">반복되는 일을 잃어버리지 않기 위한 기록</p>
+  <div class="lock-card">
+    <p style="font-size:0.85rem;margin-bottom:12px;color:var(--text)">처음 사용하시는군요. 기록을 보호할 비밀번호를 설정해 주세요.</p>
+    <label for="setup-pw">비밀번호 (4자리 이상)</label>
+    <input type="password" id="setup-pw" placeholder="숫자, 문자 모두 가능" autocomplete="new-password">
+    <label for="setup-pw2">비밀번호 확인</label>
+    <input type="password" id="setup-pw2" placeholder="한 번 더 입력해 주세요" autocomplete="new-password">
+    <label for="setup-secret">비밀 단어</label>
+    <input type="text" id="setup-secret" placeholder="비밀번호를 잊었을 때 사용할 단어" autocomplete="off">
+    <p class="hint">비밀 단어는 비밀번호 분실 시 사용됩니다. 쉽게 유추되는 단어는 피해 주세요.</p>
+    <div class="info-box">이 잠금은 다른 사람이 우연히 화면을 열었을 때 바로 보이지 않게 하는 간이 잠금입니다. 기록은 이 기기의 브라우저에만 저장됩니다. 공용 기기에서는 사용에 주의해 주세요.</div>
+    <button type="button" class="btn btn-primary" onclick="doSetup()">시작하기</button>
+  </div>
+</div>
+<div id="lock-login" class="lock-screen hidden">
+  <div class="login-content">
+    <img class="login-character" src="어른새록4_함께.png" alt="">
+    <div class="lock-card">
+      <h1 class="login-title">새록</h1>
+      <label for="login-pw">비밀번호</label>
+      <input type="password" id="login-pw" placeholder="비밀번호를 입력해 주세요" autocomplete="current-password">
+      <p id="login-error" class="hint" style="color:var(--delete-color);display:none"></p>
+      <button type="button" class="btn btn-primary" onclick="doLogin()">열기</button>
+      <button type="button" class="btn btn-ghost" onclick="showRecover()">비밀번호를 잊으셨나요</button>
+    </div>
+  </div>
+</div>
+<div id="lock-recover" class="lock-screen hidden">
+  <h1>비밀번호 확인</h1>
+  <p class="subtitle">처음 설정한 비밀 단어를 입력해 주세요.</p>
+  <div class="lock-card">
+    <div id="recover-step1">
+      <label for="recover-secret">비밀 단어</label>
+      <input type="text" id="recover-secret" placeholder="처음에 설정한 비밀 단어" autocomplete="off">
+      <p id="recover-error" class="hint" style="color:var(--delete-color);display:none"></p>
+      <button type="button" class="btn btn-primary" onclick="checkSecret()">확인</button>
+    </div>
+    <div id="recover-step2" class="hidden">
+      <label for="recover-newpw">새 비밀번호 (4자리 이상)</label>
+      <input type="password" id="recover-newpw" placeholder="새 비밀번호" autocomplete="new-password">
+      <label for="recover-newpw2">새 비밀번호 확인</label>
+      <input type="password" id="recover-newpw2" placeholder="한 번 더 입력해 주세요" autocomplete="new-password">
+      <button type="button" class="btn btn-primary" onclick="resetPassword()">비밀번호 변경하기</button>
+    </div>
+    <div class="warn-box" style="margin-top:16px">비밀번호와 비밀 단어를 모두 잊으면 기록을 복구할 수 없습니다. 중요한 기록은 정리·요약 탭에서 텍스트 내보내기나 데이터 백업으로 따로 보관해 주세요.</div>
+    <button type="button" class="btn btn-ghost" onclick="showLogin()">뒤로 가기</button>
+  </div>
+</div>
+<div id="app" class="hidden">
+  <nav class="tab-nav">
+    <div class="tab-header">
+      <div class="tab-segment">
+        <button type="button" class="tab-btn active" onclick="switchTab('record')">📝 기록하기</button>
+        <button type="button" class="tab-btn" onclick="switchTab('timeline')">📅 타임라인</button>
+        <button type="button" class="tab-btn" onclick="switchTab('summary')">📋 정리·요약</button>
+      </div>
+      <button type="button" class="lock-btn" onclick="lockApp()" title="잠그기" aria-label="화면 잠그기">🔒</button>
+    </div>
+  </nav>
+  <div class="tab-content">
+    <div id="panel-record" class="tab-panel active"></div>
+    <div id="panel-timeline" class="tab-panel"></div>
+    <div id="panel-summary" class="tab-panel"></div>
+  </div>
+</div>
+<script>
+'use strict';
+const STORAGE_KEY='saferecord_adult_data',AUTH_KEY='saferecord_adult_auth';
+function $(id){return document.getElementById(id)}
+function showOnly(id){['lock-setup','lock-login','lock-recover','app'].forEach(s=>$(s).classList.add('hidden'));$(id).classList.remove('hidden')}
+function getRecords(){try{return JSON.parse(localStorage.getItem(STORAGE_KEY))||[]}catch{return[]}}
+function saveRecords(r){try{localStorage.setItem(STORAGE_KEY,JSON.stringify(r));return true}catch(e){alert('저장 공간이 부족해 기록을 저장하지 못했습니다. 기존 기록은 그대로 남아 있습니다.');return false}}
+
+// --- 시간대 정렬 순서 ---
+const TIME_ORDER={'출근 전':1,'오전 업무':2,'점심시간':3,'오후 업무':4,'퇴근 후':5,'저녁/밤':6,'주말/휴일':7,'온라인/메신저':8,'':99};
+function getTimeOrder(t){return TIME_ORDER[t||'']||99}
+// 새 기록은 time에 'HH:MM'을 저장하고, 예전 기록은 '오후 업무' 같은 시간대 문자열을 그대로 둔다.
+// 없던 정보를 만들지 않기 위해 옛 값을 시각으로 변환하지 않고 읽기만 한다.
+// evidence는 배열로 저장한다. 예전 기록·백업의 문자열 값도 읽을 수 있도록 배열로 감싼다.
+function normEvidence(v){
+  if(Array.isArray(v))return v.filter(x=>typeof x==='string'&&x&&x!=='없음');
+  if(typeof v==='string'&&v&&v!=='없음')return [v];
+  return [];
+}
+function isClockTime(t){return typeof t==='string'&&/^\d{2}:\d{2}$/.test(t)}
+function formatTimeLabel(r){
+  const t=r&&r.time;if(!t)return '';
+  if(!isClockTime(t))return t;
+  const h=parseInt(t.slice(0,2),10),m=t.slice(3,5);
+  const ap=h<12?'오전':'오후';let h12=h%12;if(h12===0)h12=12;
+  return `${ap} ${h12}:${m}${r.timeApprox?'경':''}`;
+}
+// 정렬: 시각 기록은 실제 시간순, 옛 범주형 기록만 TIME_ORDER를 사용한다.
+function timeSortKey(t){
+  if(isClockTime(t))return parseInt(t.slice(0,2),10)*60+parseInt(t.slice(3,5),10);
+  if(!t)return -10000; // 시간을 안 적은 기록은 맨 아래
+  return -(100-getTimeOrder(t)); // 옛 범주형은 시각 기록 아래에, 자기들끼리는 하루 순서대로
+}
+
+// --- 공통 정렬 함수: 날짜 최신순 → 시간대순 → createdAt 최신순 → id 기준 ---
+function sortRecordsDesc(records){
+  return [...records].sort((a,b)=>{
+    const dc=b.date.localeCompare(a.date);if(dc!==0)return dc;
+    const tc=timeSortKey(b.time)-timeSortKey(a.time);if(tc!==0)return tc;
+    const ac=(b.createdAt||'').localeCompare(a.createdAt||'');if(ac!==0)return ac;
+    return(b.id||0)-(a.id||0);
+  });
+}
+
+// --- 사람/showTo 분리: 쉼표만 구분자 ---
+function splitPersons(str){if(!str)return[];return str.split(/[,，]+/).map(s=>s.trim()).filter(Boolean)}
+
+// --- 백업 알림 ---
+const BACKUP_KEY='saferecord_adult_backup_meta';
+function getBackupMeta(){try{return JSON.parse(localStorage.getItem(BACKUP_KEY))||{}}catch{return{}}}
+function setBackupMeta(obj){try{localStorage.setItem(BACKUP_KEY,JSON.stringify(obj))}catch{}}
+function shouldShowBackupHint(){
+  const meta=getBackupMeta();const records=getRecords();
+  if(records.length<5)return false;
+  if(!meta.lastBackupAt)return true;
+  const newSince=records.length-(meta.lastBackupRecordCount||0);
+  return newSince>=5;
+}
+
+// --- XSS 방지: HTML 이스케이프 ---
+function esc(s){if(!s)return '';const d=document.createElement('div');d.textContent=s;return d.innerHTML}
+
+// --- PBKDF2 해싱 (Web Crypto API) ---
+async function deriveHash(password,salt){
+  const enc=new TextEncoder();
+  const keyMaterial=await crypto.subtle.importKey('raw',enc.encode(password),'PBKDF2',false,['deriveBits']);
+  const bits=await crypto.subtle.deriveBits({name:'PBKDF2',salt:enc.encode(salt),iterations:100000,hash:'SHA-256'},keyMaterial,256);
+  return Array.from(new Uint8Array(bits)).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+function generateSalt(){return crypto.getRandomValues(new Uint8Array(16)).reduce((s,b)=>s+b.toString(16).padStart(2,'0'),'')}
+
+function getAuth(){try{return JSON.parse(localStorage.getItem(AUTH_KEY))}catch{return null}}
+function setAuthRaw(obj){localStorage.setItem(AUTH_KEY,JSON.stringify(obj))}
+
+// 기존 평문 형식 감지: version 필드가 없으면 평문
+function isLegacyAuth(auth){return auth&&!auth.version}
+
+async function setAuthHashed(pw,secret){
+  const pwSalt=generateSalt(),secretSalt=generateSalt();
+  const pwHash=await deriveHash(pw,pwSalt);
+  const secretHash=await deriveHash(secret,secretSalt);
+  setAuthRaw({version:2,pwHash,pwSalt,secretHash,secretSalt});
+}
+async function verifyPw(pw,auth){
+  if(isLegacyAuth(auth))return pw===auth.pw;
+  const hash=await deriveHash(pw,auth.pwSalt);
+  return hash===auth.pwHash;
+}
+async function verifySecret(secret,auth){
+  if(isLegacyAuth(auth))return secret===auth.secret;
+  const hash=await deriveHash(secret,auth.secretSalt);
+  return hash===auth.secretHash;
+}
+// 마이그레이션: 평문 → 해시 (로그인 성공 직후 호출)
+async function migrateIfLegacy(auth,pw){
+  if(isLegacyAuth(auth)){
+    // 평문 비밀 단어를 그대로 해싱 (비밀 단어는 평문에서 읽어옴)
+    await setAuthHashed(pw,auth.secret);
+  }
+}
+</script>
+<script>
+// --- 잠금 화면 로직 ---
+async function doSetup(){
+  const pw=$('setup-pw').value.trim(),pw2=$('setup-pw2').value.trim(),secret=$('setup-secret').value.trim();
+  if(pw.length<4){alert('비밀번호는 4자리 이상으로 만들어 주세요.');return}
+  if(pw!==pw2){alert('비밀번호가 서로 다릅니다. 다시 확인해 주세요.');return}
+  if(!secret){alert('비밀 단어를 입력해 주세요.');return}
+  await setAuthHashed(pw,secret);enterApp();
+}
+async function doLogin(){
+  const pw=$('login-pw').value.trim(),auth=getAuth();
+  if(!auth){showOnly('lock-setup');return}
+  const ok=await verifyPw(pw,auth);
+  if(ok){$('login-error').style.display='none';await migrateIfLegacy(auth,pw);enterApp()}
+  else{$('login-error').textContent='비밀번호가 맞지 않습니다. 다시 입력해 주세요.';$('login-error').style.display='block'}
+}
+function showRecover(){showOnly('lock-recover');$('recover-step1').classList.remove('hidden');$('recover-step2').classList.add('hidden')}
+function showLogin(){showOnly('lock-login')}
+async function checkSecret(){
+  const secret=$('recover-secret').value.trim(),auth=getAuth();
+  const ok=await verifySecret(secret,auth);
+  if(ok){$('recover-step1').classList.add('hidden');$('recover-step2').classList.remove('hidden');$('recover-error').style.display='none'}
+  else{$('recover-error').textContent='비밀 단어가 맞지 않습니다. 기록은 안전하게 남아 있습니다.';$('recover-error').style.display='block'}
+}
+async function resetPassword(){
+  const pw=$('recover-newpw').value.trim(),pw2=$('recover-newpw2').value.trim();
+  if(pw.length<4){alert('비밀번호는 4자리 이상으로 만들어 주세요.');return}
+  if(pw!==pw2){alert('비밀번호가 서로 다릅니다. 다시 확인해 주세요.');return}
+  const auth=getAuth();
+  // 비밀 단어 해시는 유지, 비밀번호만 새로 해싱
+  const pwSalt=generateSalt();const pwHash=await deriveHash(pw,pwSalt);
+  if(isLegacyAuth(auth)){
+    // 레거시 → 전체 마이그레이션
+    const secretSalt=generateSalt();const secretHash=await deriveHash(auth.secret,secretSalt);
+    setAuthRaw({version:2,pwHash,pwSalt,secretHash,secretSalt});
+  }else{
+    setAuthRaw({...auth,pwHash,pwSalt});
+  }
+  alert('비밀번호가 변경되었습니다. 기록은 그대로 유지됩니다.');enterApp();
+}
+function enterApp(){showOnly('app');renderRecord();renderTimeline();renderSummary()}
+function lockApp(){showOnly('lock-login');$('login-pw').value='';$('login-error').style.display='none'}
+
+// --- 인앱 브라우저 감지 ---
+// 카카오톡, 인스타그램 등 앱 안에서 열린 화면은 저장 공간이 따로 분리돼서
+// 나중에 크롬이나 사파리로 같은 주소를 열면 기록이 보이지 않는다.
+function detectInAppBrowser(){
+  const ua=navigator.userAgent||'';
+  const list=[
+    [/KAKAOTALK/i,'카카오톡'],[/NAVER\(inapp/i,'네이버 앱'],[/DaumApps/i,'다음 앱'],
+    [/Instagram/i,'인스타그램'],[/FBAN|FBAV|FB_IAB/i,'페이스북'],[/Line\//i,'라인'],
+    [/everytimeApp/i,'에브리타임'],[/BAND\//i,'밴드'],[/Snapchat/i,'스냅챗'],[/TikTok/i,'틱톡']
+  ];
+  for(const [re,name] of list){if(re.test(ua))return name}
+  return null;
+}
+function showEnvNoticeIfNeeded(){
+  try{if(localStorage.getItem('saferecord_adult_env_ack')==='1')return}catch{}
+  const app=detectInAppBrowser();
+  if(!app)return;
+  $('env-notice-body').textContent=
+    '지금 이 화면은 '+app+' 안에서 열렸습니다. 이렇게 열면 기록이 '+app+' 전용 공간에 저장되어, '+
+    '나중에 크롬이나 사파리로 같은 주소를 열었을 때 기록이 보이지 않습니다. 백업 파일 저장도 되지 않을 수 있습니다. '+
+    '오른쪽 위 메뉴에서 "다른 브라우저로 열기"를 선택한 뒤 사용해 주세요.';
+  $('env-notice').style.display='block';
+}
+function dismissEnvNotice(){
+  try{localStorage.setItem('saferecord_adult_env_ack','1')}catch{}
+  $('env-notice').style.display='none';
+}
+
+// --- 화면이 가려지면 자동 잠금 ---
+// 폰 화면을 끄거나 다른 앱으로 넘어가는 것이 급할 때 가장 흔한 동작이므로,
+// 화면에서 벗어나는 시점에 쓰던 내용을 임시저장하고 잠근다.
+// 다만 백업 파일을 고르려고 파일 선택창을 여는 동안에도 화면이 가려진 것으로 잡히기 때문에,
+// 그때는 잠금을 잠시 미룬다. 선택을 취소해도 화면으로 돌아오면 억제가 반드시 풀리도록 했다.
+let filePickerAt=0,filePickerTimer=null;
+function markFilePickerOpen(){filePickerAt=Date.now();clearTimeout(filePickerTimer)}
+function clearFilePickerFlag(){filePickerAt=0;clearTimeout(filePickerTimer)}
+// 성인판은 화면을 벗어나는 즉시 내용을 가리되, 유예 시간 안에 돌아오면
+// 비밀번호 없이 이어서 쓸 수 있게 한다. 앱 전환 화면에 기록이 비치는 것은 막으면서
+// 잠깐 다른 앱을 봤다 오는 흔한 상황에서 매번 비밀번호를 묻지 않기 위해서다.
+const RELOCK_GRACE_MS=30000;
+let hiddenAt=0;
+function isAppOpen(){return !$('app').classList.contains('hidden')}
+document.addEventListener('visibilitychange',function(){
+  if(document.visibilityState==='hidden'){
+    clearTimeout(filePickerTimer);
+    if(!isAppOpen())return;
+    try{collectCurrentStep();saveDraft()}catch{}
+    // 파일 선택창을 연 직후라면 가리지 않는다 (억제는 최대 1분까지만 유효)
+    if(filePickerAt&&Date.now()-filePickerAt<60000)return;
+    hiddenAt=Date.now();
+    $('screen-cover').classList.remove('hidden');
+    return;
+  }
+  // 돌아왔을 때: 파일 선택 억제 해제
+  clearTimeout(filePickerTimer);
+  filePickerTimer=setTimeout(clearFilePickerFlag,800);
+  if(!hiddenAt)return;
+  const away=Date.now()-hiddenAt; hiddenAt=0;
+  $('screen-cover').classList.add('hidden');
+  // 백그라운드에서는 타이머가 지연될 수 있으므로 경과 시간을 직접 계산한다
+  if(away>=RELOCK_GRACE_MS)lockApp();
+});
+function switchTab(name){
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  $('panel-'+name).classList.add('active');
+  const btns=document.querySelectorAll('.tab-btn');
+  const idx=name==='record'?0:name==='timeline'?1:2;
+  btns[idx].classList.add('active');
+  if(name==='timeline')renderTimeline();
+  if(name==='summary')renderSummary();
+}
+</script>
+
+<script>
+// --- 퍼널 UI ---
+const EMOTIONS=['두려웠다','화가 났다','슬펐다','억울했다','수치스러웠다','불안했다','혼란스러웠다','무기력했다','고립된 느낌이었다','아무것도 느끼지 못했다'];
+const BODY_REACTIONS=['심장이 빨리 뛰었다','손이 떨렸다','울었다','소화가 안 됐다','두통이 있었다','호흡이 어려웠다','잠을 못 잤다','식욕이 없었다','몸이 굳었다','아무 반응 없었다'];
+const EVIDENCE_OPTIONS=['캡처/스크린샷','사진','녹음','메시지·메일','문서·업무 기록','CCTV 확인 가능성','기타'];
+const CONTEXTS=['직장','가족','연인·배우자','지인·친척','이웃·모임','온라인','기타'];
+let funnelStep=0,funnelData={},funnelEditIdx=-1,draftRestored=false;
+const DRAFT_KEY='saferecord_adult_draft';
+
+// --- 작성 중 임시저장 ---
+// 잠기거나 새로고침돼도 쓰던 내용이 사라지지 않게 한다.
+// 새 기록을 쓰는 중에만 저장하고, 기존 기록을 수정 중일 때는 저장하지 않는다.
+function saveDraft(){
+  if(funnelEditIdx>=0)return;
+  if(funnelStep<1||funnelStep>5)return;
+  const d=funnelData;
+  const hasContent=(d.event||'').trim()||(d.place||'').trim()||(d.person||'').trim()||
+    (d.witness||'').trim()||(d.help||'').trim()||(d.showTo||'').trim()||(d.context||'')||
+    (d.emotions&&d.emotions.length)||(d.body&&d.body.length)||(d.time||'');
+  if(!hasContent)return;
+  try{localStorage.setItem(DRAFT_KEY,JSON.stringify({step:funnelStep,data:d,savedAt:new Date().toISOString()}))}catch{}
+}
+function loadDraft(){try{return JSON.parse(localStorage.getItem(DRAFT_KEY))}catch{return null}}
+function clearDraft(){try{localStorage.removeItem(DRAFT_KEY)}catch{}}
+function draftNoticeHTML(){
+  const dr=loadDraft();
+  if(!dr||draftRestored)return '';
+  return `<div class="draft-notice">쓰다가 멈춘 기록이 남아 있습니다. 이어서 쓰거나, 지우고 새로 시작할 수 있습니다.
+    <div class="draft-actions">
+      <button type="button" class="draft-keep" onclick="resumeDraft()">이어서 쓰기</button>
+      <button type="button" class="draft-drop" onclick="discardDraft()">지우고 새로 쓰기</button>
+    </div></div>`;
+}
+function resumeDraft(){
+  const dr=loadDraft();
+  if(!dr){renderStep();return}
+  funnelData={...dr.data};funnelStep=dr.step||1;funnelEditIdx=-1;draftRestored=true;
+  renderStep();
+}
+function discardDraft(){clearDraft();draftRestored=true;renderStep()}
+
+function renderRecord(editData,editIdx){
+  if(editData!==undefined){funnelData={...editData};funnelEditIdx=editIdx;funnelStep=1;}
+  else if(funnelEditIdx===-1&&funnelStep===0&&!funnelData.event){funnelData={date:new Date().toISOString().slice(0,10),time:'',timeApprox:false,context:'',place:'',event:'',person:'',witness:'',evidence:[],emotions:[],body:[],help:'',showTo:''};funnelEditIdx=-1;}
+  renderStep();
+}
+
+function mascotHTML(step){
+  const data=[
+    {img:'어른새록1_생각.png',alt:'생각하는 새록',main:'천천히 떠올려 보셔도 괜찮아요.',sub:'기억나는 만큼만 적어도 됩니다.'},
+    {img:'어른새록2_기록.png',alt:'기록하는 새록',main:'완벽하게 쓰지 않으셔도 돼요.',sub:'기억나는 방식대로 적어도 충분합니다.'},
+    {img:'어른새록3_상태.png',alt:'마음을 살피는 새록',main:'감정도 함께 적어두셔도 괜찮아요.',sub:'감정과 몸의 반응도 중요한 기록입니다.'},
+    {img:'어른새록4_함께.png',alt:'함께 생각하는 새록',main:'지금 필요한 것을 생각해보세요.',sub:'아직 모르겠다면 비워두셔도 됩니다.'},
+    {img:'어른새록5_품은.png',alt:'기록을 지켜주는 새록',main:'준비되셨다면 저장해 주세요.',sub:'나중에 다시 수정하셔도 괜찮습니다.'}
+  ];
+  const d=data[step-1];
+  return `<div class="mascot-panel"><img src="${d.img}" alt="${d.alt}"><div class="mascot-bubble"><div class="mascot-main">${d.main}</div><div class="mascot-sub">${d.sub}</div></div></div>`;
+}
+
+function renderStep(){
+  const d=funnelData;const isEdit=funnelEditIdx>=0;
+  let dots='';for(let i=1;i<=5;i++){dots+=`<span class="step-dot ${i===funnelStep?'active':i<funnelStep?'done':''}"></span>`}
+  const indicator=funnelStep>=1?`<div class="step-indicator">${dots}<span class="step-counter">${funnelStep} / 5</span></div>`:'';
+  let html='';
+  if(funnelStep===0){
+    html=draftNoticeHTML()+`<div class="card" style="border-left:4px solid var(--accent)">
+      <div class="onboard-title"><h2>사라지지 않는 기록</h2><p>반복되는 일을 잃어버리지 않기 위한 기록</p></div>
+      <div class="mascot-intro"><img src="어른새록5_품은.png" alt="기록을 지켜주는 새록"></div>
+      <div class="onboard-desc">애매해서 넘겼던 일이나<br>내가 기억하는 게 맞는지 헷갈렸던 순간도<br>기억나는 만큼 차분히 남겨둘 수 있습니다.<br><br>이 앱은 누군가를 판단하거나 신고를 결정하지 않습니다.<br>기록이 쌓이면 반복되는 흐름을 다시 살펴보고,<br>필요할 때 도움을 요청할 자료로 정리할 수 있습니다.</div>
+      <h3 style="margin-top:18px">사용 전에 알아두세요</h3>
+      <div class="onboard-points">
+        <div class="onboard-point"><span>📝</span><span><b>판단하지 않습니다</b><br>괴롭힘 여부·책임 소재·신고 여부를 앱이 대신 결론 내리지 않습니다.</span></div>
+        <div class="onboard-point"><span>📱</span><span><b>현재 브라우저에만 저장됩니다</b><br>기록은 서버로 자동 전송되지 않고 지금 사용하는 브라우저에 저장됩니다.</span></div>
+        <div class="onboard-point"><span>📎</span><span><b>증거 원본은 저장하지 않습니다</b><br>사진·녹음·메시지 파일은 보관하지 않고, 어떤 자료가 있는지만 기록합니다.</span></div>
+        <div class="onboard-point"><span>🔐</span><span><b>잠금은 간이 잠금입니다</b><br>우연한 열람을 줄이기 위한 기능이며 기록 전체를 암호화하는 것은 아닙니다.</span></div>
+      </div>
+      <button type="button" class="btn btn-primary" onclick="funnelStep=1;renderStep()">기록 시작하기</button>
+      <details class="onboard-more">
+        <summary>저장·백업에 대해 더 알아보기</summary>
+        <p>브라우저나 기기를 바꾸면 기존 기록이 자동으로 이어지지 않습니다. 기록을 옮길 때는 정리·요약 탭의 JSON 백업 파일을 사용해 주세요.</p>
+        <p>내보낸 파일은 다운로드 폴더에 평문으로 남을 수 있으므로 보관에 주의해 주세요.</p>
+        <p>이 앱은 법률·의료 상담을 대신하지 않습니다.</p>
+      </details>
+    </div>
+    <div class="footer-credit">기획·설계: 결 (Gyeol)<br>Claude와 ChatGPT의 도움을 받아, Kiro와 함께 제작</div>`;
+  }else if(funnelStep===1){
+    html=`${indicator}
+      <div class="warn-banner">⚠ 지금 즉각적인 위험 상황이라면, 기록보다 먼저 <b>112</b>(경찰)로 연락해 주세요.<br>가정폭력·교제폭력·성폭력·스토킹 상담은 <b>여성긴급전화 1366</b>(365일 24시간), 직장 내 괴롭힘 상담은 <b>고용노동부 1350</b>(평일 09~18시)에서 받을 수 있습니다.</div>
+      <div class="card"><h3>1단계. 언제, 어디서</h3>${mascotHTML(1)}
+        <div class="form-group"><label>날짜</label><input type="date" id="f-date" value="${esc(d.date)||''}"></div>
+        <div class="form-group"><label>시간 <span class="optional">(선택)</span></label><input type="time" id="f-time" value="${isClockTime(d.time)?esc(d.time):''}"><label class="time-approx"><input type="checkbox" id="f-approx" ${d.timeApprox?'checked':''}> 대략적인 시간이에요</label><p class="form-hint">정확히 기억나지 않으면 비워 두어도 됩니다. 아는 만큼만 적어도 되고, 나중에 메시지나 통화 기록과 맞춰 볼 때 도움이 됩니다.</p>${d.time&&!isClockTime(d.time)?`<p class="form-hint">이전에 저장한 시간대: ${esc(d.time)} (시간을 새로 고르면 대체됩니다)</p>`:''}</div>
+        <div class="form-group"><label>관계 맥락 <span class="optional">(선택)</span></label><select id="f-context"><option value="">선택 안 함</option>${CONTEXTS.map(c=>`<option value="${c}" ${d.context===c?'selected':''}>${c}</option>`).join('')}</select><p class="form-hint">어떤 관계에서 있었던 일인지만 남겨 둡니다. 앱이 그 의미를 판단하지는 않습니다.</p></div><div class="form-group"><label>장소 <span class="optional">(선택)</span></label><input type="text" id="f-place" value="${esc(d.place)}" placeholder="사무실, 회의실, 집, 차 안, 메신저..."></div>
+        <div class="step-nav"><button type="button" class="btn btn-primary" onclick="nextStep()">다음 →</button></div>
+      </div>`;
+  }else if(funnelStep===2){
+    html=`${indicator}
+      <div class="info-banner">이 기록은 누군가를 탓하기 위한 것이 아니라, 겪은 일을 잃어버리지 않기 위한 것입니다.</div>
+      <div class="card"><h3>2단계. 무슨 일이 있었는지</h3>${mascotHTML(2)}
+        <div class="form-group"><label>있었던 일</label><textarea id="f-event" placeholder="기억나는 대로 적어 주세요. 완벽하지 않아도 됩니다.">${esc(d.event)}</textarea></div>
+        <div class="form-group"><label>관련된 사람 <span class="optional">(선택)</span></label><input type="text" id="f-person" value="${esc(d.person)}" placeholder="이니셜, 직책, 별칭 등 본인만 알 수 있는 표현"><p class="form-hint">실명·직책·이니셜·별칭 중 편한 방식으로 적어도 됩니다. 나중에 다시 알아볼 수 있도록 같은 사람은 가능한 한 같은 방식으로 적어 주세요. 실명을 적는 경우 화면 노출 가능성도 함께 고려해 주세요. 여러 명이면 쉼표로 나눠 적을 수 있습니다.</p></div>
+        <div class="form-group"><label>목격자 <span class="optional">(선택)</span></label><input type="text" id="f-witness" value="${esc(d.witness)}" placeholder="있다면 적어 주세요"></div>
+        <div class="form-group"><label>증거 자료 <span class="optional">(선택)</span></label><div class="chip-group" id="f-evidence">${EVIDENCE_OPTIONS.map(e=>`<button type="button" class="chip ${normEvidence(d.evidence).includes(e)?'selected':''}" onclick="toggleChip(this);toggleCctvHint()">${e}</button>`).join('')}</div><p class="form-hint" id="cctv-hint" style="display:${normEvidence(d.evidence).includes('CCTV 확인 가능성')?'block':'none'};color:var(--warn-text)">CCTV 영상은 장소와 운영자에 따라 보관기간이 다를 수 있습니다. 필요하다면 가능한 한 빨리 보관 여부를 확인해 보세요.</p><p class="form-hint">해당하는 것을 모두 고를 수 있습니다. 아무것도 고르지 않으면 없는 것으로 봅니다. 파일 자체는 저장하지 않고, 어떤 자료가 있을 수 있는지만 표시해 둡니다.</p></div>
+        <div class="step-nav"><button type="button" class="btn btn-back" onclick="prevStep()">← 이전</button><button type="button" class="btn btn-primary" onclick="nextStep()">다음 →</button></div>
+      </div>`;
+  }else if(funnelStep===3){
+    html=`${indicator}<div class="card"><h3>3단계. 그때 내 상태</h3>${mascotHTML(3)}
+        <div class="form-group"><label>그때 느낀 감정 <span class="optional">(여러 개 선택 가능)</span></label><div class="chip-group" id="f-emotions">${EMOTIONS.map(e=>`<span class="chip ${(d.emotions||[]).includes(e)?'selected':''}" role="button" tabindex="0" onclick="toggleChip(this)">${esc(e)}</span>`).join('')}</div></div>
+        <div class="form-group"><label>몸의 반응 <span class="optional">(선택)</span></label><div class="chip-group" id="f-body">${BODY_REACTIONS.map(b=>`<span class="chip ${(d.body||[]).includes(b)?'selected':''}" role="button" tabindex="0" onclick="toggleChip(this)">${esc(b)}</span>`).join('')}</div></div>
+        <div class="step-nav"><button type="button" class="btn btn-back" onclick="prevStep()">← 이전</button><button type="button" class="btn btn-primary" onclick="nextStep()">다음 →</button></div>
+      </div>`;
+  }else if(funnelStep===4){
+    html=`${indicator}<div class="card"><h3>4단계. 지금 필요한 것</h3>${mascotHTML(4)}
+        <div class="form-group"><label>지금 어떤 도움이 필요한가요? <span class="optional">(선택)</span></label><textarea id="f-help" placeholder="상담, 법률 조언, 누군가에게 이야기하기, 아직 모르겠음...">${esc(d.help)}</textarea></div>
+        <div class="form-group"><label>이 기록을 누구에게 보여주고 싶은가요? <span class="optional">(선택)</span></label><input type="text" id="f-showto" value="${esc(d.showTo)}" placeholder="상담사, 변호사, 노무사, 가족, 아직 없음"></div>
+        <div class="step-nav"><button type="button" class="btn btn-back" onclick="prevStep()">← 이전</button><button type="button" class="btn btn-primary" onclick="nextStep()">다음 →</button></div>
+      </div>`;
+  }else if(funnelStep===5){
+    html=`${indicator}<div class="card"><h3>5단계. 저장 전 확인</h3>${mascotHTML(5)}
+        <p style="font-size:0.82rem;color:var(--text-sub);margin-bottom:12px">아래 내용을 확인한 뒤 저장해 주세요.</p>
+        <div class="confirm-section"><div class="confirm-label">날짜 / 시간</div><div class="confirm-value">${esc(d.date)}${d.time?' · '+esc(formatTimeLabel(d)):' · 안 적음'}</div></div>
+        <div class="confirm-section"><div class="confirm-label">관계 맥락</div><div class="confirm-value">${esc(d.context)||'안 적음'}</div></div>
+        <div class="confirm-section"><div class="confirm-label">장소</div><div class="confirm-value">${esc(d.place)||'안 적음'}</div></div>
+        <div class="confirm-section"><div class="confirm-label">있었던 일</div><div class="confirm-value">${esc(d.event)||'안 적음'}</div></div>
+        <div class="confirm-section"><div class="confirm-label">관련된 사람</div><div class="confirm-value">${esc(d.person)||'안 적음'}</div></div>
+        <div class="confirm-section"><div class="confirm-label">목격자</div><div class="confirm-value">${esc(d.witness)||'안 적음'}</div></div>
+        <div class="confirm-section"><div class="confirm-label">증거 자료</div><div class="confirm-value">${normEvidence(d.evidence).length?'📎 '+esc(normEvidence(d.evidence).join(', ')):'없음'}</div></div>
+        <div class="confirm-section"><div class="confirm-label">감정</div>${d.emotions&&d.emotions.length?`<div class="confirm-chips">${d.emotions.map(e=>`<span class="chip selected" style="cursor:default">${esc(e)}</span>`).join('')}</div>`:'<div class="confirm-value">안 적음</div>'}</div>
+        <div class="confirm-section"><div class="confirm-label">몸의 반응</div>${d.body&&d.body.length?`<div class="confirm-chips">${d.body.map(b=>`<span class="chip selected" style="cursor:default">${esc(b)}</span>`).join('')}</div>`:'<div class="confirm-value">안 적음</div>'}</div>
+        <div class="confirm-section"><div class="confirm-label">필요한 도움</div><div class="confirm-value">${esc(d.help)||'안 적음'}</div></div>
+        <div class="confirm-section"><div class="confirm-label">보여주고 싶은 사람</div><div class="confirm-value">${esc(d.showTo)||'안 적음'}</div></div>
+        <div class="step-nav"><button type="button" class="btn btn-back" onclick="prevStep()">← 수정하기</button><button type="button" class="btn btn-primary" onclick="saveFunnel()">${isEdit?'수정 완료':'이 기록 저장하기'}</button></div>
+      </div>
+      <div class="info-banner" style="margin-top:4px">기록은 현재 사용하는 브라우저에 저장됩니다. 어디로도 전송되지 않습니다.</div>`;
+  }
+  $('panel-record').innerHTML=html;
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function toggleCctvHint(){const h=document.getElementById('cctv-hint');if(h)h.style.display=getSelectedChips('f-evidence').includes('CCTV 확인 가능성')?'block':'none'}
+function toggleChip(el){el.classList.toggle('selected');collectCurrentStep();saveDraft()}
+
+// 입력 중에도 잠깐씩 임시저장한다 (타이핑마다 저장하지 않도록 잠시 모아서 처리)
+let draftTimer=null;
+document.addEventListener('input',function(e){
+  if(!e.target.closest||!e.target.closest('#panel-record'))return;
+  clearTimeout(draftTimer);
+  draftTimer=setTimeout(function(){collectCurrentStep();saveDraft()},600);
+});
+document.addEventListener('keydown',function(e){if((e.key==='Enter'||e.key===' ')&&e.target.classList.contains('chip')){e.preventDefault();toggleChip(e.target)}});
+function getSelectedChips(id){return Array.from(document.querySelectorAll('#'+id+' .chip.selected')).map(c=>c.textContent)}
+function collectCurrentStep(){
+  const d=funnelData;
+  if(funnelStep===1){const de=document.getElementById('f-date'),pe=document.getElementById('f-place');const ce=document.getElementById('f-context');
+    const te=document.getElementById('f-time'),ax=document.getElementById('f-approx');
+    if(de)d.date=de.value;
+    if(ce)d.context=ce.value;
+    if(pe)d.place=pe.value.trim();
+    if(te){
+      if(te.value)d.time=te.value.slice(0,5);
+      else if(isClockTime(d.time))d.time='';
+      d.timeApprox=!!(ax&&ax.checked&&d.time);
+    }
+  }
+  else if(funnelStep===2){const ev=document.getElementById('f-event'),pe=document.getElementById('f-person'),wi=document.getElementById('f-witness'),ei=document.getElementById('f-evidence');if(ev)d.event=ev.value.trim();if(pe)d.person=pe.value.trim();if(wi)d.witness=wi.value.trim();if(ei)d.evidence=getSelectedChips('f-evidence')}
+  else if(funnelStep===3){d.emotions=getSelectedChips('f-emotions');d.body=getSelectedChips('f-body')}
+  else if(funnelStep===4){const he=document.getElementById('f-help'),sh=document.getElementById('f-showto');if(he)d.help=he.value.trim();if(sh)d.showTo=sh.value.trim()}
+}
+function nextStep(){collectCurrentStep();if(funnelStep===1&&!funnelData.date){alert('날짜를 선택해 주세요.');return}if(funnelStep===2&&!funnelData.event){alert('있었던 일을 적어 주세요. 짧아도 괜찮습니다.');return}funnelStep++;saveDraft();renderStep()}
+function prevStep(){collectCurrentStep();funnelStep--;saveDraft();renderStep()}
+function saveFunnel(){
+  const d=funnelData;const now=new Date().toISOString();
+  const record={date:d.date,time:d.time,timeApprox:!!d.timeApprox,context:d.context,place:d.place,event:d.event,person:d.person,witness:d.witness,evidence:normEvidence(d.evidence),emotions:d.emotions,body:d.body,help:d.help,showTo:d.showTo,id:Date.now()};
+  const records=getRecords();
+  if(funnelEditIdx>=0){
+    record.id=records[funnelEditIdx].id;
+    record.createdAt=records[funnelEditIdx].createdAt||null;
+    record.updatedAt=now;
+    records[funnelEditIdx]=record;
+  }else{
+    record.createdAt=now;
+    record.updatedAt=null;
+    records.push(record);
+  }
+  if(!saveRecords(records))return;
+  clearDraft();draftRestored=true;
+  alert(funnelEditIdx>=0?'수정되었습니다.':'기록이 안전하게 저장되었습니다.');
+  funnelStep=0;funnelData={date:new Date().toISOString().slice(0,10),time:'',timeApprox:false,context:'',place:'',event:'',person:'',witness:'',evidence:[],emotions:[],body:[],help:'',showTo:''};funnelEditIdx=-1;renderStep();
+}
+</script>
+
+<script>
+// --- 타임라인 ---
+function renderTimeline(){
+  const records=sortRecordsDesc(getRecords());
+  let html=`<div class="info-banner">기록이 쌓이면 흐름이 보여요. 지금 바로 의미를 정하지 않아도 괜찮아요.</div>`;
+  if(records.length===0){
+    html+='<div class="card"><div class="mascot-empty"><img src="어른새록3_상태.png" alt="기록하는 새록"><p style="color:var(--text-sub);font-size:0.85rem">아직 기록이 없어요.<br>기록하기 탭에서 첫 기록을 남겨 보세요.</p></div></div>';
+  }else{
+    records.forEach(r=>{
+      const realIdx=getRecords().findIndex(x=>x.id===r.id);
+      const emotionTags=(r.emotions||[]).map(e=>`<span class="tl-tag">${esc(e)}</span>`).join('');
+      const personTag=r.person?`<span class="tl-tag">${esc(r.person)}</span>`:'';
+      const createdStr=r.createdAt?formatDateTime(r.createdAt):(typeof r.id==='number'&&r.id>1e12?formatDateTime(new Date(r.id).toISOString()):'');
+      const updatedStr=r.updatedAt?formatDateTime(r.updatedAt):'';
+      html+=`<div class="timeline-card" onclick="toggleTL(this)">
+        <div class="tl-header"><span class="tl-date">${esc(r.date)}${r.time?' '+esc(formatTimeLabel(r)):''}</span><span class="tl-expand-icon">▼</span></div>
+        ${r.context||r.place?`<div class="tl-place">${r.context?`🧭 ${esc(r.context)}`:''}${r.context&&r.place?' · ':''}${r.place?`📍 ${esc(r.place)}`:''}</div>`:''}
+        <div class="tl-summary">${esc(r.event)}</div>
+        <div class="tl-tags">${emotionTags}${personTag}</div>
+        <div class="tl-detail">
+          <div class="tl-detail-row"><div class="tl-detail-label">날짜 / 시간</div><div class="tl-detail-value">${esc(r.date)}${r.time?' · '+esc(formatTimeLabel(r)):''}</div></div>
+          ${r.context?`<div class="tl-detail-row"><div class="tl-detail-label">관계 맥락</div><div class="tl-detail-value">${esc(r.context)}</div></div>`:''}
+          ${r.place?`<div class="tl-detail-row"><div class="tl-detail-label">장소</div><div class="tl-detail-value">${esc(r.place)}</div></div>`:''}
+          <div class="tl-detail-row"><div class="tl-detail-label">있었던 일</div><div class="tl-detail-value">${esc(r.event)}</div></div>
+          ${r.person?`<div class="tl-detail-row"><div class="tl-detail-label">관련된 사람</div><div class="tl-detail-value">${esc(r.person)}</div></div>`:''}
+          ${r.witness?`<div class="tl-detail-row"><div class="tl-detail-label">목격자</div><div class="tl-detail-value">${esc(r.witness)}</div></div>`:''}
+          ${normEvidence(r.evidence).length?`<div class="tl-detail-row"><div class="tl-detail-label">증거</div><div class="tl-detail-value">📎 ${esc(normEvidence(r.evidence).join(', '))}</div></div>`:''}
+          ${r.emotions&&r.emotions.length?`<div class="tl-detail-row"><div class="tl-detail-label">감정</div><div class="tl-detail-chips">${r.emotions.map(e=>`<span class="tl-detail-chip">${esc(e)}</span>`).join('')}</div></div>`:''}
+          ${r.body&&r.body.length?`<div class="tl-detail-row"><div class="tl-detail-label">몸의 반응</div><div class="tl-detail-chips">${r.body.map(b=>`<span class="tl-detail-chip">${esc(b)}</span>`).join('')}</div></div>`:''}
+          ${r.help?`<div class="tl-detail-row"><div class="tl-detail-label">필요한 도움</div><div class="tl-detail-value">${esc(r.help)}</div></div>`:''}
+          ${r.showTo?`<div class="tl-detail-row"><div class="tl-detail-label">보여주고 싶은 사람</div><div class="tl-detail-value">${esc(r.showTo)}</div></div>`:''}
+          ${createdStr?`<div class="tl-detail-row"><div class="tl-detail-label">최초 저장</div><div class="tl-detail-value">${createdStr}</div></div>`:''}
+          ${updatedStr?`<div class="tl-detail-row"><div class="tl-detail-label">마지막 수정</div><div class="tl-detail-value">${updatedStr}</div></div>`:''}
+          <div class="tl-actions">
+            <button type="button" class="tl-edit-btn" onclick="event.stopPropagation();editRecord(${realIdx})">수정</button>
+            <button type="button" class="tl-delete-btn" onclick="event.stopPropagation();deleteRecord(${realIdx})">삭제</button>
+          </div>
+        </div>
+      </div>`;
+    });
+  }
+  $('panel-timeline').innerHTML=html;
+}
+function formatDateTime(iso){if(!iso)return '';try{const d=new Date(iso);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')+' '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')}catch{return ''}}
+function toggleTL(el){el.classList.toggle('expanded')}
+function editRecord(idx){const records=getRecords();funnelData={...records[idx]};funnelEditIdx=idx;funnelStep=1;switchTab('record');renderStep()}
+function deleteRecord(idx){if(!confirm('이 기록을 삭제하시겠습니까? 되돌릴 수 없습니다.'))return;const records=getRecords();records.splice(idx,1);saveRecords(records);renderTimeline()}
+</script>
+
+<script>
+// --- 정리·요약 ---
+const EMOTION_LABELS={'두려웠다':'두려움','화가 났다':'화남','슬펐다':'슬픔','억울했다':'억울함','수치스러웠다':'수치심','불안했다':'불안','혼란스러웠다':'혼란','무기력했다':'무기력','고립된 느낌이었다':'고립감','아무것도 느끼지 못했다':'무감각'};
+function renderSummary(){
+  const records=getRecords();
+  if(records.length===0){$('panel-summary').innerHTML=`<div class="info-banner">지금 바로 의미를 정하지 않아도 괜찮아요. 기록이 쌓이면 반복되는 흐름을 다시 살펴볼 수 있어요.</div><div class="card"><div class="mascot-empty"><img src="어른새록5_품은.png" alt="기록을 지켜주는 새록"><p style="color:var(--text-sub);font-size:0.85rem">기록이 쌓이면 여기에 요약이 표시돼요.</p></div></div><div class="card"><h3>📂 백업 파일 가져오기</h3><p style="font-size:0.82rem;color:var(--text-sub);margin-bottom:12px;line-height:1.5">다른 브라우저나 기기에서 쓰던 기록이 있다면, 그곳에서 내보낸 백업 파일(.json)을 여기로 가져올 수 있습니다.</p><button type="button" class="btn btn-primary" onclick="importJSON()">📂 백업 파일 가져오기</button></div>`;return}
+  const sorted=[...records].sort((a,b)=>a.date.localeCompare(b.date));
+  const firstDate=sorted[0].date,lastDate=sorted[sorted.length-1].date;
+  const contextCount={};records.forEach(r=>{if(r.context)contextCount[r.context]=(contextCount[r.context]||0)+1});
+  const topContexts=Object.entries(contextCount).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  const placeCount={};records.forEach(r=>{if(r.place)placeCount[r.place]=(placeCount[r.place]||0)+1});
+  const topPlaces=Object.entries(placeCount).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  const personCount={};records.forEach(r=>{if(r.person)splitPersons(r.person).forEach(p=>{if(p)personCount[p]=(personCount[p]||0)+1})});
+  const topPersons=Object.entries(personCount).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  const emotionCount={};EMOTIONS.forEach(e=>emotionCount[e]=0);records.forEach(r=>(r.emotions||[]).forEach(e=>emotionCount[e]++));
+  const bodyCount={};records.forEach(r=>(r.body||[]).forEach(b=>bodyCount[b]=(bodyCount[b]||0)+1));
+  const topBody=Object.entries(bodyCount).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  const showToSet=new Set();records.forEach(r=>{if(r.showTo)splitPersons(r.showTo).forEach(s=>{if(s&&s!=='아직 없음')showToSet.add(s)})});
+  const recentRecords=sortRecordsDesc(records).slice(0,5);
+  const mainEmotions=Object.entries(emotionCount).filter(([k,v])=>v>0).sort((a,b)=>b[1]-a[1]).slice(0,3).map(([k])=>EMOTION_LABELS[k]||k);
+  const summaryText=genSummary(records.length,firstDate,lastDate,topContexts,topPlaces,topPersons,mainEmotions,recentRecords);
+  let html=`<div class="info-banner">지금 바로 의미를 정하지 않아도 괜찮아요. 기록이 쌓이면 반복되는 흐름을 다시 살펴볼 수 있어요.</div>`;
+  if(shouldShowBackupHint()){html+=`<div class="backup-hint"><span>💾 마지막 백업 이후 새 기록이 쌓였습니다. 중요한 기록은 따로 보관해 두는 것이 좋습니다.</span><button type="button" class="btn btn-primary" onclick="exportJSON()">지금 백업하기</button></div>`}
+  html+=`<div class="card"><h3>📊 전체 기록 현황</h3><div class="stat-row"><span class="stat-label">기록 건수</span><span class="stat-value">${records.length}건</span></div><div class="stat-row"><span class="stat-label">기간</span><span class="stat-value">${esc(firstDate)} ~ ${esc(lastDate)}</span></div></div>
+    ${topContexts.length?`<div class="card"><h3>🧭 반복되는 관계 맥락</h3>${topContexts.map(([c,n])=>`<div class="stat-row"><span class="stat-label">${esc(c)}</span><span class="stat-value">${n}회</span></div>`).join('')}</div>`:''}
+    <div class="card"><h3>📍 반복되는 장소</h3>${topPlaces.length?topPlaces.map(([p,c])=>`<div class="stat-row"><span class="stat-label">${esc(p)}</span><span class="stat-value">${c}회</span></div>`).join(''):'<p style="font-size:0.83rem;color:var(--text-sub)">아직 장소 데이터가 부족합니다.</p>'}</div>
+    <div class="card"><h3>👤 반복되는 사람</h3>${topPersons.length?topPersons.map(([p,c])=>`<div class="stat-row"><span class="stat-label">${esc(p)}</span><span class="stat-value">${c}회</span></div>`).join(''):'<p style="font-size:0.83rem;color:var(--text-sub)">아직 데이터가 부족합니다.</p>'}</div>
+    <div class="card"><h3>💭 감정 변화</h3>${(()=>{const active=EMOTIONS.filter(e=>emotionCount[e]>0);if(!active.length)return'<p style="font-size:0.83rem;color:var(--text-sub)">아직 기록된 감정이 없습니다.</p>';const maxE=Math.max(...active.map(e=>emotionCount[e]),1);return'<div class="bar-chart">'+active.map(e=>{const cnt=emotionCount[e],pct=Math.round(cnt/maxE*100);return`<div class="bar-row"><span class="bar-label">${esc(EMOTION_LABELS[e])}</span><div class="bar-track"><div class="bar-fill" style="width:${pct}%"></div></div><span class="bar-count">${cnt}</span></div>`}).join('')+'</div>'})()}</div>
+    <div class="card"><h3>🫀 몸의 반응</h3>${topBody.length?topBody.map(([b,c])=>`<div class="stat-row"><span class="stat-label">${esc(b)}</span><span class="stat-value">${c}회</span></div>`).join(''):'<p style="font-size:0.83rem;color:var(--text-sub)">아직 데이터가 부족합니다.</p>'}</div>
+    <div class="card"><h3>📋 도움 요청용 요약문</h3><div class="summary-box" id="summary-text">${esc(summaryText)}</div><p style="font-size:0.78rem;color:var(--text-sub);margin-top:10px;line-height:1.5">관련 사람을 별칭으로 적었다면, 요약문을 보여줄 때 누구를 뜻하는지 직접 설명해도 됩니다.</p><button type="button" class="btn btn-primary" onclick="copySummary()" style="margin-top:12px">📋 요약문 복사하기</button></div>`;
+  if(showToSet.size>0){html+=`<div class="card"><h3>👁 보여주고 싶은 사람</h3>${[...showToSet].map(s=>`<span class="chip selected" style="cursor:default">${esc(s)}</span>`).join(' ')}<p style="font-size:0.82rem;color:var(--text-sub);margin-top:10px">준비가 되었을 때 요약문과 함께 보여줄 수 있습니다.</p></div>`}
+  html+=`<div class="card"><h3>💾 백업 &amp; 내보내기</h3><p style="font-size:0.82rem;color:var(--text-sub);margin-bottom:12px">⚠ 중요한 기록은 정기적으로 백업해 주세요. 폰을 바꾸거나 브라우저 데이터가 삭제되면 기록이 사라질 수 있습니다.</p><p style="font-size:0.78rem;color:var(--text-sub);margin-bottom:12px;line-height:1.5">기록은 현재 사용하는 브라우저에만 저장됩니다. 크롬에서 쓴 기록은 사파리나 카카오톡 화면에서는 보이지 않습니다. 브라우저나 기기를 바꿀 때는 백업 파일을 내보낸 뒤 새 브라우저에서 가져오기로 옮길 수 있습니다.</p><p style="font-size:0.78rem;color:var(--text-sub);margin-bottom:12px;line-height:1.5">내보낸 파일은 다운로드 폴더에 평문으로 남을 수 있습니다. 다른 사람이 기기를 볼 가능성이 있다면, 안전한 곳으로 옮긴 뒤 필요에 따라 기기에서 삭제해 주세요.</p><button type="button" class="btn btn-primary" onclick="exportText()">📄 텍스트 내보내기 (.txt)</button><button type="button" class="btn btn-primary" onclick="exportJSON()" style="margin-top:8px">💾 데이터 백업 (.json)</button><button type="button" class="btn btn-primary" onclick="importJSON()" style="margin-top:8px">📂 백업 파일 가져오기</button></div>`;
+  $('panel-summary').innerHTML=html;
+}
+function genSummary(count,firstDate,lastDate,topContexts,topPlaces,topPersons,mainEmotions,recentRecords){
+  let t=`[도움 요청용 요약문]\n\n기간: ${firstDate} ~ ${lastDate} (총 ${count}건의 기록)\n\n`;
+  if(topContexts.length)t+=`관계 맥락: ${topContexts.map(([c,n])=>`${c}(${n}회)`).join(', ')}\n`;
+  if(topPlaces.length)t+=`주요 장소: ${topPlaces.map(([p,c])=>`${p}(${c}회)`).join(', ')}\n`;
+  if(topPersons.length)t+=`관련 인물: ${topPersons.map(([p,c])=>`${p}(${c}회)`).join(', ')}\n`;
+  if(mainEmotions.length)t+=`주된 감정: ${mainEmotions.join(', ')}\n`;
+  const shown=Math.min(recentRecords.length,count);
+  t+=count>shown?`\n--- 최근 기록 요약 (전체 ${count}건 중 최근 ${shown}건) ---\n`:`\n--- 기록 요약 (전체 ${count}건) ---\n`;
+  recentRecords.forEach((r,i)=>{const ca=r.createdAt?formatDateTime(r.createdAt):(typeof r.id==='number'&&r.id>1e12?formatDateTime(new Date(r.id).toISOString()):'');t+=`\n[${i+1}] ${r.date}${r.time?' '+formatTimeLabel(r):''}${r.place?' / '+r.place:''}${ca?' (저장: '+ca+')':''}\n${r.event.slice(0,100)}${r.event.length>100?'...':''}\n`});
+  const helpTexts=recentRecords.filter(r=>r.help).map(r=>r.help);
+  if(helpTexts.length)t+=`\n필요한 도움: ${helpTexts[0]}\n`;
+  if(count>shown)t+=`\n위 목록은 최근 ${shown}건만 옮긴 것이며, 전체 ${count}건은 텍스트 내보내기(.txt) 파일에 모두 들어 있습니다.\n`;
+  t+=`\n---\n이 기록은 누군가를 단정하거나 처벌하기 위한 판단문이 아닙니다. 반복된 경험을 정리해 안전한 도움을 요청하기 위한 자료입니다.`;
+  return t;
+}
+function copySummary(){const text=$('summary-text').textContent;if(navigator.clipboard){navigator.clipboard.writeText(text).then(()=>alert('요약문이 복사되었습니다.')).catch(()=>prompt('아래 내용을 복사해 주세요:',text))}else{prompt('아래 내용을 복사해 주세요:',text)}}
+</script>
+
+<script>
+// --- 내보내기·백업·JSON 검증 ---
+function exportText(){
+  const records=getRecords().sort((a,b)=>a.date.localeCompare(b.date));
+  if(!records.length){alert('내보낼 기록이 없습니다.');return}
+  let t='=== 사라지지 않는 기록 ===\n내보내기 날짜: '+new Date().toLocaleDateString('ko-KR')+'\n\n';
+  records.forEach((r,i)=>{t+=`--- 기록 ${i+1} ---\n날짜: ${r.date}${r.time?' '+formatTimeLabel(r):''}\n`;if(r.context)t+=`관계 맥락: ${r.context}\n`;if(r.place)t+=`장소: ${r.place}\n`;t+=`있었던 일: ${r.event}\n`;if(r.person)t+=`관련 사람: ${r.person}\n`;if(r.witness)t+=`목격자: ${r.witness}\n`;if(normEvidence(r.evidence).length)t+=`증거: ${normEvidence(r.evidence).join(', ')}\n`;if(r.emotions&&r.emotions.length)t+=`감정: ${r.emotions.join(', ')}\n`;if(r.body&&r.body.length)t+=`몸의 반응: ${r.body.join(', ')}\n`;if(r.help)t+=`필요한 도움: ${r.help}\n`;if(r.showTo)t+=`보여주고 싶은 사람: ${r.showTo}\n`;const ca=r.createdAt?formatDateTime(r.createdAt):(typeof r.id==='number'&&r.id>1e12?formatDateTime(new Date(r.id).toISOString()):'');if(ca)t+=`최초 저장: ${ca}\n`;if(r.updatedAt)t+=`마지막 수정: ${formatDateTime(r.updatedAt)}\n`;t+='\n'});
+  t+='---\n이 기록은 누군가를 단정하거나 처벌하기 위한 판단문이 아닙니다.\n반복된 경험을 정리해 안전한 도움을 요청하기 위한 자료입니다.\n';
+  dlFile('\uFEFF'+t,'기록_'+new Date().toISOString().slice(0,10)+'.txt','text/plain');
+}
+function exportJSON(){const records=getRecords();if(!records.length){alert('백업할 기록이 없습니다.');return}dlFile(JSON.stringify({version:1,appType:'adult',exported:new Date().toISOString(),records},null,2),'백업_'+new Date().toISOString().slice(0,10)+'.json','application/json');setBackupMeta({lastBackupAt:new Date().toISOString(),lastBackupRecordCount:records.length});renderSummary()}
+function dlFile(content,filename,type){const blob=new Blob([content],{type:type+';charset=utf-8'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=filename;document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url)}
+function importJSON(){markFilePickerOpen();$('import-file').click()}
+
+// JSON 검증 및 안전한 가져오기
+function validateRecord(r){
+  if(!r||typeof r!=='object')return null;
+  const safe={};
+  safe.date=typeof r.date==='string'?r.date.slice(0,10):'';
+  safe.time=typeof r.time==='string'?r.time.slice(0,20):'';
+  safe.timeApprox=r.timeApprox===true;
+  safe.context=typeof r.context==='string'?r.context.slice(0,30):'';
+  safe.place=typeof r.place==='string'?r.place.slice(0,200):'';
+  safe.event=typeof r.event==='string'?r.event.slice(0,5000):'';
+  safe.person=typeof r.person==='string'?r.person.slice(0,200):'';
+  safe.witness=typeof r.witness==='string'?r.witness.slice(0,200):'';
+  safe.evidence=normEvidence(r.evidence).slice(0,10).map(x=>x.slice(0,50));
+  safe.emotions=Array.isArray(r.emotions)?r.emotions.filter(e=>typeof e==='string').slice(0,10):[];
+  safe.body=Array.isArray(r.body)?r.body.filter(b=>typeof b==='string').slice(0,10):[];
+  safe.help=typeof r.help==='string'?r.help.slice(0,2000):'';
+  safe.showTo=typeof r.showTo==='string'?r.showTo.slice(0,200):'';
+  safe.id=(typeof r.id==='number'||typeof r.id==='string')?r.id:Date.now()+Math.random();
+  safe.createdAt=typeof r.createdAt==='string'?r.createdAt:null;
+  safe.updatedAt=typeof r.updatedAt==='string'?r.updatedAt:null;
+  if(!safe.date||!safe.event)return null;
+  return safe;
+}
+function handleImport(event){
+  const file=event.target.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=function(e){
+    try{
+      const data=JSON.parse(e.target.result);
+      if(!data||typeof data!=='object'||!Array.isArray(data.records)){alert('올바른 백업 파일이 아닌 것 같습니다.');return}
+      if(data.appType&&data.appType!=='adult'){
+        if(!confirm('다른 버전의 새록에서 내보낸 백업 파일로 보입니다. 그래도 가져올까요?'))return;
+      }
+      const existing=getRecords();const ids=new Set(existing.map(r=>String(r.id)));
+      let added=0,skipped=0;
+      data.records.forEach(r=>{
+        const safe=validateRecord(r);
+        if(!safe){skipped++;return}
+        if(ids.has(String(safe.id))){skipped++;return}
+        existing.push(safe);ids.add(String(safe.id));added++;
+      });
+      if(!saveRecords(existing))return;
+      let msg=`백업에서 새 기록 ${added}건을 가져왔습니다.`;
+      if(skipped>0)msg+=`\n형식이 맞지 않거나 중복인 기록 ${skipped}건은 제외했습니다.`;
+      alert(msg);
+      renderTimeline();renderSummary();
+    }catch(err){alert('파일을 읽을 수 없습니다. .json 백업 파일인지 확인해 주세요.')}
+  };reader.readAsText(file);event.target.value='';
+}
+
+// --- 앱 시작 ---
+document.addEventListener('DOMContentLoaded',function(){
+  if(!window.crypto||!window.crypto.subtle){
+    document.body.innerHTML='<div style="padding:40px;text-align:center;font-family:sans-serif;color:#333"><h2 style="margin-bottom:16px">지원되지 않는 환경입니다</h2><p>이 앱은 브라우저의 보안 기능(Web Crypto API)이 필요합니다.<br>최신 브라우저(Chrome, Safari, Edge, Firefox)를 사용해 주세요.<br><br>기존 기록은 삭제되지 않았습니다.</p></div>';
+    return;
+  }
+  showEnvNoticeIfNeeded();
+  const fileInput=$('import-file');
+  if(fileInput){
+    fileInput.addEventListener('change',clearFilePickerFlag);
+    fileInput.addEventListener('cancel',clearFilePickerFlag);
+  }
+  const auth=getAuth();
+  if(!auth){showOnly('lock-setup')}else{showOnly('lock-login')}
+  $('login-pw').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin()});
+  $('setup-pw2').addEventListener('keydown',e=>{if(e.key==='Enter')doSetup()});
+});
+</script>
+</body>
+</html>
