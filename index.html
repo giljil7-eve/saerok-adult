@@ -785,7 +785,7 @@ function copySummary(){const text=$('summary-text').textContent;if(navigator.cli
 function exportText(){
   const records=getRecords().sort((a,b)=>a.date.localeCompare(b.date));
   if(!records.length){alert('내보낼 기록이 없습니다.');return}
-  let t='=== 사라지지 않는 기록 ===\n내보내기 날짜: '+new Date().toLocaleDateString('ko-KR')+'\n\n';
+  let t='=== 기록 요약 ===\n내보내기 날짜: '+new Date().toLocaleDateString('ko-KR')+'\n\n';
   records.forEach((r,i)=>{t+=`--- 기록 ${i+1} ---\n날짜: ${r.date}${r.time?' '+formatTimeLabel(r):''}\n`;if(r.context)t+=`관계 맥락: ${r.context}\n`;if(r.place)t+=`장소: ${r.place}\n`;t+=`있었던 일: ${r.event}\n`;if(r.person)t+=`관련 사람: ${r.person}\n`;if(r.witness)t+=`목격자: ${r.witness}\n`;if(normEvidence(r.evidence).length)t+=`증거: ${normEvidence(r.evidence).join(', ')}\n`;if(r.emotions&&r.emotions.length)t+=`감정: ${r.emotions.join(', ')}\n`;if(r.body&&r.body.length)t+=`몸의 반응: ${r.body.join(', ')}\n`;if(r.help)t+=`필요한 도움: ${r.help}\n`;if(r.showTo)t+=`보여주고 싶은 사람: ${r.showTo}\n`;const ca=r.createdAt?formatDateTime(r.createdAt):(typeof r.id==='number'&&r.id>1e12?formatDateTime(new Date(r.id).toISOString()):'');if(ca)t+=`최초 저장: ${ca}\n`;if(r.updatedAt)t+=`마지막 수정: ${formatDateTime(r.updatedAt)}\n`;t+='\n'});
   t+='---\n이 기록은 누군가를 단정하거나 처벌하기 위한 판단문이 아닙니다.\n반복된 경험을 정리해 안전한 도움을 요청하기 위한 자료입니다.\n';
   dlFile('\uFEFF'+t,'기록_'+new Date().toISOString().slice(0,10)+'.txt','text/plain');
