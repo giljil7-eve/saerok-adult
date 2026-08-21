@@ -317,6 +317,9 @@ function sortRecordsDesc(records){
 
 // --- 사람/showTo 분리: 쉼표만 구분자 ---
 function splitPersons(str){if(!str)return[];return str.split(/[,，]+/).map(s=>s.trim()).filter(Boolean)}
+function normalizeAlias(s){return String(s||'').trim().toLowerCase()}
+function addAliasCount(map,alias){const display=String(alias||'').trim();if(!display)return;const key=normalizeAlias(display);if(!key)return;if(!map[key])map[key]={display,count:0};map[key].count++}
+function aliasCountEntries(map){return Object.values(map).map(v=>[v.display,v.count])}
 
 // --- 백업 알림 ---
 const BACKUP_KEY='saferecord_adult_backup_meta';
@@ -740,12 +743,13 @@ function renderSummary(){
   const topContexts=Object.entries(contextCount).sort((a,b)=>b[1]-a[1]).slice(0,5);
   const placeCount={};records.forEach(r=>{if(r.place)placeCount[r.place]=(placeCount[r.place]||0)+1});
   const topPlaces=Object.entries(placeCount).sort((a,b)=>b[1]-a[1]).slice(0,5);
-  const personCount={};records.forEach(r=>{if(r.person)splitPersons(r.person).forEach(p=>{if(p)personCount[p]=(personCount[p]||0)+1})});
-  const topPersons=Object.entries(personCount).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  const personCount={};records.forEach(r=>{if(r.person)splitPersons(r.person).forEach(p=>addAliasCount(personCount,p))});
+  const topPersons=aliasCountEntries(personCount).sort((a,b)=>b[1]-a[1]).slice(0,5);
   const emotionCount={};EMOTIONS.forEach(e=>emotionCount[e]=0);records.forEach(r=>(r.emotions||[]).forEach(e=>emotionCount[e]++));
   const bodyCount={};records.forEach(r=>(r.body||[]).forEach(b=>bodyCount[b]=(bodyCount[b]||0)+1));
   const topBody=Object.entries(bodyCount).sort((a,b)=>b[1]-a[1]).slice(0,5);
-  const showToSet=new Set();records.forEach(r=>{if(r.showTo)splitPersons(r.showTo).forEach(s=>{if(s&&s!=='아직 없음')showToSet.add(s)})});
+  const showToMap=new Map();records.forEach(r=>{if(r.showTo)splitPersons(r.showTo).forEach(s=>{const display=String(s||'').trim();const key=normalizeAlias(display);if(display&&display!=='아직 없음'&&!showToMap.has(key))showToMap.set(key,display)})});
+  const showToSet=new Set(showToMap.values());
   const recentRecords=sortRecordsDesc(records).slice(0,5);
   const mainEmotions=Object.entries(emotionCount).filter(([k,v])=>v>0).sort((a,b)=>b[1]-a[1]).slice(0,3).map(([k])=>EMOTION_LABELS[k]||k);
   const summaryText=genSummary(records.length,firstDate,lastDate,topContexts,topPlaces,topPersons,mainEmotions,recentRecords);
